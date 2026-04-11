@@ -79,7 +79,7 @@ def sjf(process_list):
 def rr(process_list):
     reset_processors()
 
-    time_quantum = 10**6
+    time_quantum = 10**2
     queue = deque(process_list)
 
     while queue:
@@ -107,7 +107,7 @@ def rr(process_list):
         wait += p.completion_time - p.burst_time
         turn += p.completion_time
 
-    return wait / len(process_list), turn / len(process_list)
+    return 10 * wait / len(process_list), 10 * turn / len(process_list)
 
 
 if __name__ == "__main__":
@@ -124,10 +124,10 @@ if __name__ == "__main__":
             process_list.append(Process(pid, burst, memory))
 
     fifo_result = fifo(clone_processes(process_list))
-    sjf_result = sjf(clone_processes(process_list))
+    sjf_result = sjf(clone_processes(process_list)) 
     rr_result = rr(clone_processes(process_list))
 
-    print("\noutput: (avg_wait, avg_turnaround) in cpu cycles\n")
+    print("\noutput: (avg_wait, avg_turnaround) in millions of cpu cycles\n")
     print("fifo:", fifo_result)
     print("sjf :", sjf_result)
     print("rr  :", rr_result)
