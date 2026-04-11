@@ -1,3 +1,4 @@
+import csv
 # algorithm will calculate wich processor a process will be assigned to, 
 # in what order the processes will go in, and for how long
 # also what the average turnaround time is
@@ -59,6 +60,7 @@ def min_turnaround(processes: list) -> tuple:
         
         if num_assigned != num_completed:
             time += 0.25 # time is moving; time increments by 0.25 since fastest speed = 4 and 4 * 0.25 = 1 = smallest val of cycles
+    time /= 1000000000
     return (time, slow, fast)
         
 
@@ -89,14 +91,19 @@ def merge_sort_proc(processes):
     return merge (sorted_left, sorted_right)
 
 if __name__ == '__main__':
-    # test data if we are not actively using the 250 generated processes
-    test_data = [(1, 6000, 10), (2, 40000, 200), (3, 20, 1200),
-                 (4, 80000, 8120), (5, 1, 400), (6, 1000000, 1000), 
-                 (7, 800, 230), (8, 12, 7821), (9, 612, 10000),
-                 (10, 9820, 812), (11, 15, 4082), (12, 170000, 1190), 
-                 (13, 720, 82), (14, 1509, 482), (15, 184200, 1), 
-                 (16, 10, 2), (17, 34, 4122), (18, 170, 16000)]
-    results = min_turnaround(test_data)
-    print(f'Turnaround: {results[0]}')
+    process_list = []
+
+    with open("processes.csv", "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            pid = int(row[0])
+            burst = int(row[1])
+            memory = int(row[2])
+            process_list.append([pid, burst, memory])
+    
+    results = min_turnaround(process_list)
+    print(f'Turnaround: {results[0]} seconds')
     print(results[1])
     print(results[2])
