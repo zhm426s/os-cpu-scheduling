@@ -3,6 +3,8 @@ import csv
 # in what order the processes will go in, and for how long
 # also what the average turnaround time is
 
+# TODO needs edits for memory limits
+
 # processes should have cycle amounts between 1 and 1000000 (in ten millions, 10 million to 10 trillion)
 # processes should have memory amounts between 1 and 16000 (in MB, 1 megabyte to 16 gigabites)
 def min_turnaround(processes: list) -> tuple:
