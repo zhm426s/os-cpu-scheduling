@@ -15,6 +15,7 @@ def min_turnaround(processes: list) -> tuple:
     num_completed = 0 # to keep track of while loop
     num_assigned = 0 # to keep track of how many processes are available to assign
 
+    completion_times = {}       # track completion time of each process for average turnaround
 
     # first, sort processes in order of ascending burst time
     processes = merge_sort_proc(processes)
@@ -31,6 +32,8 @@ def min_turnaround(processes: list) -> tuple:
                 if slow[p][2] <= 0:
                     slow[p][1] = False
                     slow[p][2] = 0
+                    finished_proc = slow[p][0][-1]
+                    completion_times[finished_proc[0]] = time
                     num_completed += 1
             # check if processor is available and set it up if it is
             if not(slow[p][1]) and num_assigned != n:
@@ -49,6 +52,8 @@ def min_turnaround(processes: list) -> tuple:
                 if fast[p][2] <= 0:
                     fast[p][1] = False
                     fast[p][2] = 0
+                    finished_proc = fast[p][0][-1]
+                    completion_times[finished_proc[0]] = time
                     num_completed += 1
             # check if processor is available and set it up if it is
             if not(fast[p][1]) and num_assigned != n:
@@ -61,7 +66,26 @@ def min_turnaround(processes: list) -> tuple:
         if num_assigned != num_completed:
             time += 0.25 # time is moving; time increments by 0.25 since fastest speed = 4 and 4 * 0.25 = 1 = smallest val of cycles
     time /= 1000000000
-    return (time, slow, fast)
+    avg_time = (sum(completion_times.values()) / n) / 1000000000
+
+
+    # ---------------- CLEAN OUTPUT FORMATTING ----------------
+    slow_stats = {}
+    fast_stats = {}
+
+    for p in slow:
+        slow_stats[p] = {
+            "processes": slow[p][0],
+            "count": len(slow[p][0])
+        }
+
+    for p in fast:
+        fast_stats[p] = {
+            "processes": fast[p][0],
+            "count": len(fast[p][0])
+        }
+
+    return (time, avg_time, slow_stats, fast_stats)
         
 
 def merge_sort_proc(processes):
@@ -104,6 +128,28 @@ if __name__ == '__main__':
             process_list.append([pid, burst, memory])
     
     results = min_turnaround(process_list)
-    print(f'Turnaround: {results[0]} seconds')
-    print(results[1])
-    print(results[2])
+
+    slow_stats = results[2]
+    fast_stats = results[3]
+
+    print("\n================ RESULTS ================\n")
+
+    print(f"TOTAL TURNAROUND TIME: {results[0]} seconds")
+    print(f"AVERAGE TURNAROUND TIME: {results[1]} seconds\n")
+
+
+    print("=========== SLOW PROCESSORS (A, B, C) ===========")
+    for p in slow_stats:
+        s = slow_stats[p]
+        print(f"\nProcessor {p}:")
+        print(f"  Total Runtime: {sum(proc[1] for proc in s['processes'])}")
+        print(f"  Average Runtime: {(sum(proc[1] for proc in s['processes']) / s['count']) if s['count'] > 0 else 0}")
+        print(f"  Process Count: {s['count']}")
+
+    print("\n=========== FAST PROCESSORS (D, E, F) ===========")
+    for p in fast_stats:
+        f = fast_stats[p]
+        print(f"\nProcessor {p}:")
+        print(f"  Total Runtime: {sum(proc[1] for proc in f['processes'])}")
+        print(f"  Average Runtime: {(sum(proc[1] for proc in f['processes']) / f['count']) if f['count'] > 0 else 0}")
+        print(f"  Process Count: {f['count']}")
