@@ -70,7 +70,7 @@ def fifo(process_list):
 
     for p in process_list:
         wait += p.completion_time - p.burst_time  # waiting = turnaround - burst
-        turn += p.completion_time                # turnaround = completion time
+        turn += p.completion_time                 # turnaround = completion time
 
     return wait / len(process_list), turn / len(process_list)
 
@@ -136,7 +136,7 @@ def rr(process_list):
         wait += p.completion_time - p.burst_time
         turn += p.completion_time
 
-    # NOTE: multiplied by 10 (likely scaling adjustment for time quantum effects)
+    # multiplied by 10 (scaling adjustment for time quantum effects)
     return 10 * wait / len(process_list), 10 * turn / len(process_list)
 
 
