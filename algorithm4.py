@@ -50,24 +50,21 @@ def min_turnaround(processes: list) -> tuple:
     fast_occupied = 0
 
     pids_completed = []         # to keep track of the pids of processes which have been completed
-    pids_unique_waited = set([])# to keep track of pids of processes that have gone through the waiting process
+
+    time_to_sub = 0             # sum of how much time passed before every process entered the waiting queue
 
     # here in previous algorithms, the processes would be sorted. Instead, they will each join when time / 1000 = index
 
     # turnaround time for whole set is time it takes to complete all processes
     # assumes processes = list of tuples w/ format (pid, cycles, memory)
-    while num_completed < n or fast_occupied > 0 or slow_occupied > 0:
+    while num_completed < n:
         # get new process for this time 
-        new_process = None
-        new_is_slow = False
-        if (time - int(time) == 0 and int(time) % 10000 == 0 and time // 10000 <= n - 1):
-            new_process = processes[math.floor(time / 10000)]
-            waiting.append(new_process)
-            pids_unique_waited.add(new_process[0])
-            if (new_process[2] < 8000):
-                waiting_slow.append(new_process)
-                new_is_slow = True
-            # processes are not sorted until later
+        if (time % 10000 == 0 and time // 10000 <= n - 1):
+            time_to_sub += time
+            waiting.append(processes[math.floor(time / 10000)])
+            waiting = merge_sort_proc(waiting) # sort processes
+            if (processes[math.floor(time / 10000)][2] < 8000):
+                waiting_slow.append(processes[math.floor(time / 10000)])
 
         # ---------------- SLOW PROCESSORS ----------------
         # decrement cycles in currently assigned slow procs and
@@ -89,23 +86,6 @@ def min_turnaround(processes: list) -> tuple:
                     completion_times[finished_proc[0]] = time
 
                     num_completed += 1
-                else:
-                    # preempt the process and store its information in the waiting queue
-                    if (new_process and new_process[2] <= slow[p][3] and new_process[1] < slow[p][2]):
-                        waiting_slow.append([slow[p][0][-1][0], slow[p][2], slow[p][0][-1][2]])
-                        waiting.append([slow[p][0][-1][0], slow[p][2], slow[p][0][-1][2]])
-                        pids_unique_waited.add(new_process[0])
-                        del waiting_slow[-1]
-                        del waiting[-1]
-                        slow[p][0].append(new_process)
-                        slow[p][2] = new_process[1]
-                        num_assigned += 1
-                        total_time += new_process[1]
-                        est_avg = total_time / num_assigned
-                        new_process = None
-                        new_is_slow = False
-                        waiting_slow = merge_sort_proc(waiting_slow)
-                
 
             # if processor is idle then assign new process
             if not slow[p][1] and len(waiting_slow) > 0:
@@ -158,26 +138,11 @@ def min_turnaround(processes: list) -> tuple:
                     completion_times[finished_proc[0]] = time
 
                     num_completed += 1
-                else:
-                    # preempt the process and store its information in the waiting queue
-                    if (new_process and new_process[2] <= fast[p][3] and new_process[1] < fast[p][2]):
-                        waiting.append([fast[p][0][-1][0], fast[p][2], fast[p][0][-1][2]])
-                        pids_unique_waited.add(new_process[0])
-                        if len(waiting_slow) > 0 and new_is_slow:
-                            del waiting_slow[-1]
-                        del waiting[-1]
-                        fast[p][0].append(new_process)
-                        fast[p][2] = new_process[1]
-                        num_assigned += 1
-                        total_time += new_process[1]
-                        new_process = None
-                        est_avg = total_time / num_assigned
-                        waiting = merge_sort_proc(waiting)
 
             # if processor is idle assign new process
             if not fast[p][1]:
                 waitq_ptr = -1
-                while len(waiting) != 0 and abs(waitq_ptr) <= len(waiting):
+                while abs(waitq_ptr) < len(waiting) + 1:
 
                     proc = waiting[waitq_ptr]
 
@@ -208,7 +173,7 @@ def min_turnaround(processes: list) -> tuple:
         time += 0.25        # time is moving; time increments by 0.25 since fastest speed = 4 and 4 * 0.25 = 1 = smallest val of cycles
 
     time /= 1000000000
-    avg_time = (sum(completion_times.values()) / n) / 1000000000
+    avg_time = ((sum(completion_times.values()) - time_to_sub) / n) / 1000000000
 
     # ---------------- CLEAN OUTPUT FORMATTING ----------------
     slow_stats = {}
