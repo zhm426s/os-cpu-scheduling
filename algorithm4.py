@@ -43,12 +43,6 @@ def min_turnaround(processes: list) -> tuple:
     waiting = []                # track processes which have either been removed from the processor, or are newly found
     waiting_slow = []           # track processes like above but only for processes with memory < 8000
 
-    total_time = 0              # total time of added processes' bursts, for calculating est_avg time
-    est_avg = 500000            # estimated average burst time, for determining if a process should be in slow or fast
-
-    slow_occupied = 0           # to keep track of how many of each kind of processor is still available
-    fast_occupied = 0
-
     pids_completed = []         # to keep track of the pids of processes which have been completed
 
     time_to_sub = 0             # sum of how much time passed before every process entered the waiting queue
@@ -78,7 +72,6 @@ def min_turnaround(processes: list) -> tuple:
 
                     slow[p][1] = False
                     slow[p][2] = 0
-                    slow_occupied -= 1
 
                     # record completion time
                     finished_proc = slow[p][0][-1]
@@ -101,7 +94,7 @@ def min_turnaround(processes: list) -> tuple:
                         continue
                     # check if process memory fits this processor, and process burst is less than est average, or if no fast processors are available
 
-                    if (proc[2] <= slow[p][3]) and (proc[1] < est_avg or fast_occupied == 3):     
+                    if (proc[2] <= slow[p][3]):     
                             # assign the process
                             del waiting_slow[waitq_ptr]
                             if proc in waiting:
@@ -110,11 +103,6 @@ def min_turnaround(processes: list) -> tuple:
                             slow[p][1] = True
                             slow[p][2] = proc[1]
                             num_assigned += 1
-                            slow_occupied += 1
-
-                            # update estimate
-                            total_time += proc[1]
-                            est_avg = total_time / num_assigned
                             break
                     else:
                         waitq_ptr += 1
@@ -130,7 +118,6 @@ def min_turnaround(processes: list) -> tuple:
                 if fast[p][2] <= 0:
                     fast[p][1] = False
                     fast[p][2] = 0
-                    fast_occupied -= 1
 
                     # record completion time
                     finished_proc = fast[p][0][-1]
@@ -161,11 +148,6 @@ def min_turnaround(processes: list) -> tuple:
                         fast[p][1] = True
                         fast[p][2] = proc[1]
                         num_assigned += 1
-                        fast_occupied += 1
-                        
-                        # update estimate
-                        total_time += proc[1]
-                        est_avg = total_time / num_assigned
                         break
                     else:
                         waitq_ptr -= 1
@@ -173,7 +155,7 @@ def min_turnaround(processes: list) -> tuple:
         time += 0.25        # time is moving; time increments by 0.25 since fastest speed = 4 and 4 * 0.25 = 1 = smallest val of cycles
 
     time /= 1000000000
-    avg_time = (sum(completion_times.values()) - time_to_sub / n) / 1000000000
+    avg_time = ((sum(completion_times.values()) - time_to_sub) / n) / 1000000000
 
     # ---------------- CLEAN OUTPUT FORMATTING ----------------
     slow_stats = {}
