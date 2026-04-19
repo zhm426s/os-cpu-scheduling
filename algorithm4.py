@@ -51,6 +51,8 @@ def min_turnaround(processes: list) -> tuple:
 
     pids_completed = []         # to keep track of the pids of processes which have been completed
 
+    time_to_sub = 0             # sum of how much time passed before every process entered the waiting queue
+
     # here in previous algorithms, the processes would be sorted. Instead, they will each join when time / 1000 = index
 
     # turnaround time for whole set is time it takes to complete all processes
@@ -58,6 +60,7 @@ def min_turnaround(processes: list) -> tuple:
     while num_completed < n:
         # get new process for this time 
         if (time % 10000 == 0 and time // 10000 <= n - 1):
+            time_to_sub += time // 10000
             waiting.append(processes[math.floor(time / 10000)])
             waiting = merge_sort_proc(waiting) # sort processes
             if (processes[math.floor(time / 10000)][2] < 8000):
@@ -170,7 +173,7 @@ def min_turnaround(processes: list) -> tuple:
         time += 0.25        # time is moving; time increments by 0.25 since fastest speed = 4 and 4 * 0.25 = 1 = smallest val of cycles
 
     time /= 1000000000
-    avg_time = (sum(completion_times.values()) / n) / 1000000000
+    avg_time = ((sum(completion_times.values()) - time_to_sub) / n) / 1000000000
 
     # ---------------- CLEAN OUTPUT FORMATTING ----------------
     slow_stats = {}
