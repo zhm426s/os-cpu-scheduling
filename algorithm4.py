@@ -173,7 +173,7 @@ def min_turnaround(processes: list) -> tuple:
         time += 0.25        # time is moving; time increments by 0.25 since fastest speed = 4 and 4 * 0.25 = 1 = smallest val of cycles
 
     time /= 1000000000
-    avg_time = ((sum(completion_times.values()) - time_to_sub) / n) / 1000000000
+    avg_time = (sum(completion_times.values()) - time_to_sub / n) / 1000000000
 
     # ---------------- CLEAN OUTPUT FORMATTING ----------------
     slow_stats = {}
